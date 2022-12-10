@@ -1,5 +1,9 @@
 # Disaster Response Pipeline Project
 
+Everything runs accordingly 
+though it works better in debug mode
+
+
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
