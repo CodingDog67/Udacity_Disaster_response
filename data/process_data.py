@@ -5,6 +5,10 @@ import numpy as np
 import sqlite3
 from sqlalchemy import create_engine
 
+
+working_on_pycharm = False
+
+
 def load_data(messages_filepath, categories_filepath):
 
     #reading in csv data and saving as pd frame
@@ -36,14 +40,14 @@ def clean_data(df):
         #drop any column that has only one kind of label as it is useless
         unique_labels = np.unique(clean_categories[col_name])
         if len(unique_labels) == 1:
-            clean_categories.drop(col_name, axis=1,inplace=True)
+            clean_categories.drop(col_name, axis=1, inplace=True)
             continue
         if len(unique_labels) == 2:
             continue
         else:
             replace_these = np.delete(unique_labels, [0, 1])
             for val in replace_these:
-                clean_categories[col_name].replace(val, 1)
+                clean_categories[col_name].replace(val, 1, inplace=True)
 
 
     # drop original categories column
@@ -70,13 +74,23 @@ def save_data(df, database_filename):
     #conn.close()
 
     engine = create_engine('sqlite:///' + database_filename)
-    df.to_sql('DisasterResponse_table', engine, index=False, if_exists='replace')
+    df.to_sql('DisasterResponse', engine, index=False, if_exists='replace')
+
+
 
 
 def main():
-    if len(sys.argv) == 5:
 
-        messages_filepath, categories_filepath, database_filepath = sys.argv[2:]
+    if working_on_pycharm:
+        sys_args_num = 5
+    else:
+        sys_args_num = 4
+
+    if len(sys.argv) == sys_args_num:
+        if working_on_pycharm:
+            messages_filepath, categories_filepath, database_filepath = sys.argv[2:]
+        else:
+            messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
 
         print('Loading data...\n    MESSAGES: {}\n    CATEGORIES: {}'
               .format(messages_filepath, categories_filepath))

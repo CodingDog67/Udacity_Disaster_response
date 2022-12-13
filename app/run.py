@@ -14,6 +14,7 @@ from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
+working_on_pycharm = True
 
 def tokenize(text):
     tokens = word_tokenize(text)
@@ -28,16 +29,22 @@ def tokenize(text):
 
 # load data
 #engine = create_engine('sqlite:///../data/DisasterResponse.db')
-print('path exists: ', os.path.exists('../data'))
-print('file exists: ', os.path.isfile('../data/DisasterResponse.db'))
+if working_on_pycharm:
+    data_path = '../data'
+else:
+    data_path = '/data'
 
-#abs_path = os.path.abspath(os.getcwd())+"\database.db"
+print('path exists: ', os.path.exists(data_path))
+print('file exists: ', os.path.isfile(data_path + '/DisasterResponse.db'))
 
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
+engine = create_engine('sqlite:///' + data_path + '/DisasterResponse.db')
 df = pd.read_sql_table('DisasterResponse_table', engine)
 
 # load model
-model = joblib.load("../models/classifier.pkl")
+if working_on_pycharm:
+    model = joblib.load("../models/classifier.pkl")
+else:
+    model = joblib.load("/models/classifier.pkl")
 print('loaded Model')
 
 # index webpage displays cool visuals and receives user input text for model

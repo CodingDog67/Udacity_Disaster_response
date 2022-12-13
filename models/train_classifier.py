@@ -25,6 +25,9 @@ from sklearn.multioutput import MultiOutputClassifier
 nltk.download('omw-1.4')
 nltk.download(['punkt', 'wordnet'])
 
+#Adapts path and num of arguments to how pycharm works
+working_on_pycharm = False
+
 def load_data(database_filepath):
    """
    input database_filepath as string
@@ -38,8 +41,13 @@ def load_data(database_filepath):
    #conn = sqlite3.connect("../" + database_filepath)
    #table_data = pd.read_sql_table('database_filepath', conn)
 
-   engine = create_engine('sqlite:///' + "../" + database_filepath)
-   table_data = pd.read_sql_table('DisasterResponse_table', engine)
+   if working_on_pycharm:
+        path_to_engine ='sqlite:///' + "../" + database_filepath
+   else:
+       path_to_engine = 'sqlite:///' + database_filepath
+
+   engine = create_engine(path_to_engine)
+   table_data = pd.read_sql_table('DisasterResponse', engine)
 
    X = table_data["message"]
    Y = table_data.iloc[:, 4:]
@@ -67,7 +75,7 @@ def tokenize(text):
     return clean_tokens
 
 
-def build_model(clf =AdaBoostClassifier()):
+def build_model(clf=AdaBoostClassifier(random_state=42)):
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -75,8 +83,8 @@ def build_model(clf =AdaBoostClassifier()):
 
     ])
 
-    params = {'clf__estimator__learning_rate': [0.5, 1.0],
-        'clf__estimator__n_estimators': [10, 15]}
+    params = {'clf__estimator__learning_rate': [0.5, 0.8, 1.0, ],
+        'clf__estimator__n_estimators': [10, 15, 20, 25]}
 
     cv = GridSearchCV(pipeline, param_grid=params, verbose=2, n_jobs=-1)
 
@@ -116,9 +124,19 @@ def save_model(model, model_filepath):
             pickle.dump(model, f)
 
 
+
 def main():
-    if len(sys.argv) == 4:
-        database_filepath, model_filepath = sys.argv[2:]
+    if working_on_pycharm:
+        sys_args_num = 4
+    else:
+        sys_args_num = 3
+
+    if len(sys.argv) == sys_args_num:
+        if working_on_pycharm:
+            database_filepath, model_filepath = sys.argv[2:]
+        else:
+            database_filepath, model_filepath = sys.argv[1:]
+
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
